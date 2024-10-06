@@ -12,3 +12,88 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+model User {
+  id String   @id @default(uuid())
+  password String
+  username String @unique
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  submissions Submission[]
+
+  ownerTeam Team[] @relation("participants")
+  teams Team[]
+}
+model Problem {
+  id String   @id @default(uuid())
+  name    String   @unique
+  description String
+  rating Rating
+  testCases TestCase[]
+  tester Tester[]
+  draft Boolean @default(true)
+  submission Submission[]
+  contests Contest[]
+}
+model Tester {
+  id String   @id @default(uuid())
+  problemId String
+  problem Problem @relation(fields: [problemId], references: [id])
+  code String
+  active Boolean @default(true)
+  language Language
+}
+model TestCase {
+  id String   @id @default(uuid())
+  problemId String
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  input String
+}
+model Submission {
+  id String   @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code String
+  language Language
+  problemId String
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  verdict Verdict @default(PENDING)
+}
+model Team {
+  id String   @id @default(uuid())
+  name String 
+  ownerId String
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  participants User[] @relation("participants")
+  contests Contest[]
+}
+model Contest {
+  id String   @id @default(uuid())
+  name String
+  problems Problem[]
+  createdAt DateTime @default(now())
+  timeEnd DateTime
+  teamId String
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+}
+enum Rating {
+  easy
+  medium
+  hard
+}
+enum Language {
+  cpp
+}
+enum Verdict {
+  PENDING
+  OK
+  WA
+  RE
+  TL
+  ML
+  CE
+}
+enum Role {
+  USER
+  ADMIN
+}
