@@ -8,6 +8,9 @@ import { Role } from '@prisma/client';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
+  async get() {
+    return await this.prisma.user.findMany();
+  }
   async create(dto: CreateUserDto) {
     try {
       const password = await argon.hash(dto.password);

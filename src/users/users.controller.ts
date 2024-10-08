@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   UseGuards,
@@ -15,19 +16,22 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth()
+@Roles(Role.ADMIN)
+@UseGuards(JwtGuard, RolesGuard)
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private userService: UsersService) {}
-  @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
-  @Post('create')
+  @Get('')
+  get() {
+    return this.userService.get();
+  }
+  @Post('')
   signip(@Body() dto: CreateUserDto) {
     return this.userService.create(dto);
   }
-  @Roles(Role.ADMIN)
-  @UseGuards(JwtGuard, RolesGuard)
-  @Delete('delete/:id')
+
+  @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
